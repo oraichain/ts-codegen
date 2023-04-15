@@ -13,7 +13,7 @@ export const readSchemas = async ({
     schemaDir, clean = true
 }: ReadSchemaOpts): Promise<ContractInfo> => {
     const fn = clean ? cleanse : (str) => str;
-    const files = glob(schemaDir + '/**/*.json');
+    const files = glob(schemaDir + '/*.json');
     const schemas = files
         .map(file => JSON.parse(readFileSync(file, 'utf-8')));
 

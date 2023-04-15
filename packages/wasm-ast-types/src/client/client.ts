@@ -19,7 +19,7 @@ import { identifier, propertySignature } from '../utils/babel';
 export const CONSTANT_EXEC_PARAMS = [
   t.assignmentPattern(
     identifier(
-      'fee',
+      '$fee',
       t.tsTypeAnnotation(
         t.tsUnionType(
           [
@@ -37,10 +37,10 @@ export const CONSTANT_EXEC_PARAMS = [
     ),
     t.stringLiteral('auto')
   ),
-  identifier('memo', t.tsTypeAnnotation(
+  identifier('$memo', t.tsTypeAnnotation(
     t.tsStringKeyword()
   ), true),
-  identifier('funds', t.tsTypeAnnotation(
+  identifier('$funds', t.tsTypeAnnotation(
     t.tsArrayType(
       t.tsTypeReference(
         t.identifier('Coin')
@@ -50,7 +50,7 @@ export const CONSTANT_EXEC_PARAMS = [
 ];
 
 export const FIXED_EXECUTE_PARAMS = [
-  identifier('fee', t.tsTypeAnnotation(
+  identifier('$fee', t.tsTypeAnnotation(
     t.tsUnionType(
       [
         t.tsNumberKeyword(),
@@ -63,10 +63,10 @@ export const FIXED_EXECUTE_PARAMS = [
       ]
     )
   ), true),
-  identifier('memo', t.tsTypeAnnotation(
+  identifier('$memo', t.tsTypeAnnotation(
     t.tsStringKeyword()
   ), true),
-  identifier('funds', t.tsTypeAnnotation(
+  identifier('$funds', t.tsTypeAnnotation(
     t.tsArrayType(
       t.tsTypeReference(
         t.identifier('Coin')
@@ -319,9 +319,9 @@ export const createWasmExecMethod = (
 
                     ]
                   ),
-                  t.identifier('fee'),
-                  t.identifier('memo'),
-                  t.identifier('funds')
+                  t.identifier('$fee'),
+                  t.identifier('$memo'),
+                  t.identifier('$funds')
                 ]
               )
             )
