@@ -26,6 +26,10 @@ export const cleanse = (obj) => {
     // Handle the 3 simple types, and null or undefined
     if (null == obj || 'object' != typeof obj) return obj;
 
+    if (obj.type === 'object' && obj.additionalProperties === undefined) {
+        obj.additionalProperties = false;
+    }
+
     // Handle Date
     if (obj instanceof Date) {
         copy = new Date();
