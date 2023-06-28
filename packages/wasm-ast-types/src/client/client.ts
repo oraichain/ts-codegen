@@ -26,7 +26,7 @@ import { identifier, propertySignature } from "../utils/babel";
 export const CONSTANT_EXEC_PARAMS = [
   t.assignmentPattern(
     identifier(
-      "fee",
+      "_fee",
       t.tsTypeAnnotation(
         t.tsUnionType([
           t.tSNumberKeyword(),
@@ -38,7 +38,7 @@ export const CONSTANT_EXEC_PARAMS = [
     ),
     t.stringLiteral("auto")
   ),
-  identifier("memo", t.tsTypeAnnotation(t.tsStringKeyword()), true),
+  identifier("_memo", t.tsTypeAnnotation(t.tsStringKeyword()), true),
   OPTIONAL_FUNDS_PARAM,
 ];
 

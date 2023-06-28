@@ -7,7 +7,7 @@ export const OPTIONAL_FUNDS_PARAM = identifier(
   true
 );
 export const OPTIONAL_FEE_PARAM = identifier(
-  "_fee",
+  "fee",
   t.tsTypeAnnotation(
     t.tsUnionType([
       t.tsNumberKeyword(),
@@ -18,7 +18,7 @@ export const OPTIONAL_FEE_PARAM = identifier(
   true
 );
 export const OPTIONAL_MEMO_PARAM = identifier(
-  "_memo",
+  "memo",
   t.tsTypeAnnotation(t.tsStringKeyword()),
   true
 );
