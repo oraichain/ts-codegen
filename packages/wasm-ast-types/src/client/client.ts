@@ -26,7 +26,7 @@ import { identifier, propertySignature } from "../utils/babel";
 export const CONSTANT_EXEC_PARAMS = [
   t.assignmentPattern(
     identifier(
-      "$fee",
+      "fee",
       t.tsTypeAnnotation(
         t.tsUnionType([
           t.tSNumberKeyword(),
@@ -267,8 +267,8 @@ export const createWasmExecMethod = (
                 t.objectExpression([
                   t.objectProperty(msgAction, msgActionValue),
                 ]),
-                t.identifier("fee"),
-                t.identifier("memo"),
+                t.identifier("_fee"),
+                t.identifier("_memo"),
                 t.identifier("_funds"),
               ]
             )
