@@ -5,7 +5,7 @@
 */
 
 import { Coin } from "@cosmjs/amino";
-import { MsgExecuteContractEncodeObject } from "cosmwasm";
+import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { toUtf8 } from "@cosmjs/encoding";
 import { InstantiateMsg, ExecuteMsg, QueryMsg, Timestamp, Uint64, Addr, Env, BlockInfo, ContractInfo, TransactionInfo } from "./CyberPunk.types";
@@ -18,8 +18,8 @@ export interface CyberPunkMessage {
   }: {
     memCost: number;
     timeCost: number;
-  }, funds?: Coin[]) => MsgExecuteContractEncodeObject;
-  mirrorEnv: (funds?: Coin[]) => MsgExecuteContractEncodeObject;
+  }, _funds?: Coin[]) => MsgExecuteContractEncodeObject;
+  mirrorEnv: (_funds?: Coin[]) => MsgExecuteContractEncodeObject;
 }
 export class CyberPunkMessageComposer implements CyberPunkMessage {
   sender: string;
@@ -38,7 +38,7 @@ export class CyberPunkMessageComposer implements CyberPunkMessage {
   }: {
     memCost: number;
     timeCost: number;
-  }, funds?: Coin[]): MsgExecuteContractEncodeObject => {
+  }, _funds?: Coin[]): MsgExecuteContractEncodeObject => {
     return {
       typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
       value: MsgExecuteContract.fromPartial({
@@ -50,11 +50,11 @@ export class CyberPunkMessageComposer implements CyberPunkMessage {
             time_cost: timeCost
           }
         })),
-        funds
+        funds: _funds
       })
     };
   };
-  mirrorEnv = (funds?: Coin[]): MsgExecuteContractEncodeObject => {
+  mirrorEnv = (_funds?: Coin[]): MsgExecuteContractEncodeObject => {
     return {
       typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
       value: MsgExecuteContract.fromPartial({
@@ -63,7 +63,7 @@ export class CyberPunkMessageComposer implements CyberPunkMessage {
         msg: toUtf8(JSON.stringify({
           mirror_env: {}
         })),
-        funds
+        funds: _funds
       })
     };
   };

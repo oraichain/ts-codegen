@@ -26,6 +26,7 @@ export interface RecoilOptions {
 export interface TSTypesOptions {
     enabled?: boolean;
     aliasExecuteMsg?: boolean;
+    aliasEntryPoints?: boolean;
 }
 interface KeyedSchema {
     [key: string]: JSONSchema;
