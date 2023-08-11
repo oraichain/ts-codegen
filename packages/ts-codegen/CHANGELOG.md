@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.35.2](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.35.1...@cosmwasm/ts-codegen@0.35.2) (2023-08-09)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
+## [0.35.1](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.35.0...@cosmwasm/ts-codegen@0.35.1) (2023-08-09)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
+# [0.35.0](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.34.2...@cosmwasm/ts-codegen@0.35.0) (2023-08-09)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
+## [0.34.2](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.34.1...@cosmwasm/ts-codegen@0.34.2) (2023-07-30)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
+## [0.34.1](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.34.0...@cosmwasm/ts-codegen@0.34.1) (2023-07-30)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
+# [0.34.0](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.33.0...@cosmwasm/ts-codegen@0.34.0) (2023-07-28)
+
+**Note:** Version bump only for package @cosmwasm/ts-codegen
+
+
+
+
+
 # [0.33.0](https://github.com/cosmwasm/ts-codegen/compare/@cosmwasm/ts-codegen@0.32.0...@cosmwasm/ts-codegen@0.33.0) (2023-07-16)
 
 **Note:** Version bump only for package @cosmwasm/ts-codegen

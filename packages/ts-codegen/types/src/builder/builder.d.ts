@@ -14,13 +14,17 @@ export interface BundleOptions {
 }
 export interface UseContractsOptions {
     enabled?: boolean;
-    filename?: string;
 }
 export type TSBuilderOptions = {
     bundle?: BundleOptions;
+    /**
+     * Enable using shorthand constructor.
+     * Default: true
+     */
+    useShorthandCtor?: boolean;
     useContractsHooks?: UseContractsOptions;
 } & RenderOptions;
-export type BuilderFileType = 'type' | 'client' | 'recoil' | 'react-query' | 'message-composer' | 'msg-builder' | 'plugin';
+export type BuilderFileType = 'type' | 'client' | 'recoil' | 'react-query' | 'message-composer' | 'message-builder' | 'plugin';
 export interface BuilderFile {
     type: BuilderFileType;
     pluginType?: string;

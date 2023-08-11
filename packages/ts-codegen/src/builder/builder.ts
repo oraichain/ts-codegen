@@ -17,7 +17,7 @@ import generate from '@babel/generator';
 import * as t from '@babel/types';
 import { ReactQueryPlugin } from "../plugins/react-query";
 import { RecoilPlugin } from "../plugins/recoil";
-import { MsgBuilderPlugin } from "../plugins/msg-builder";
+import { MessageBuilderPlugin } from "../plugins/message-builder";
 import { MessageComposerPlugin } from "../plugins/message-composer";
 import { ClientPlugin } from "../plugins/client";
 import { TypesPlugin } from "../plugins/types";
@@ -30,7 +30,8 @@ const defaultOpts: TSBuilderOptions = {
         enabled: true,
         scope: 'contracts',
         bundleFile: 'bundle.ts'
-    }
+    },
+    useShorthandCtor: true
 }
 
 export interface TSBuilderInput {
@@ -49,21 +50,27 @@ export interface BundleOptions {
 
 export interface UseContractsOptions {
     enabled?: boolean;
-    filename?: string;
 };
 
 export type TSBuilderOptions = {
     bundle?: BundleOptions;
+    /**
+     * Enable using shorthand constructor.
+     * Default: true
+     */
+    useShorthandCtor?: boolean;
     useContractsHooks?: UseContractsOptions;
 } & RenderOptions;
 
-export type BuilderFileType = 'type' | 'client' | 'recoil' | 'react-query' | 'message-composer' | 'msg-builder' | 'plugin';
+export type BuilderFileType = 'type' | 'client' | 'recoil' | 'react-query' | 'message-composer' | 'message-builder' | 'plugin';
 
 export interface BuilderFile {
     type: BuilderFileType;
     pluginType?: string;
     contract: string;
+    //filename only: Factory.client.ts
     localname: string;
+    //full path: contracts/Factory.client.ts
     filename: string;
 };
 
@@ -103,7 +110,7 @@ export class TSBuilder {
             new MessageComposerPlugin(this.options),
             new ReactQueryPlugin(this.options),
             new RecoilPlugin(this.options),
-            new MsgBuilderPlugin(this.options),
+            new MessageBuilderPlugin(this.options),
             new ContractsContextProviderPlugin(this.options),
         ]);
     }
@@ -157,35 +164,41 @@ export class TSBuilder {
     }
 
     private async after() {
-        if (this.options.bundle.enabled) {
-            this.bundle();
-        }
 
         //create useContracts bundle file
         const contractsProviderBundlePlugin = new ContractsProviderBundlePlugin(this.options);
         contractsProviderBundlePlugin.setBuilder(this);
 
-        let files = await contractsProviderBundlePlugin.render(
-            "",
+        //contractContextProviders.ts
+        const files = await contractsProviderBundlePlugin.render(
+            "contractContextProviders",
             {
                 schemas: [],
             },
             this.outPath
         );
+
         if (files && files.length) {
             [].push.apply(this.files, files);
         }
 
-        createHelpers({
+        const helpers = createHelpers({
             outPath: this.outPath,
             contracts: this.contracts,
             options: this.options,
             plugins: this.plugins,
         }, this.builderContext);
+
+        if (helpers && helpers.length) {
+            [].push.apply(this.files, helpers);
+        }
+
+        if (this.options.bundle.enabled) {
+            this.bundle();
+        }
     }
 
     async bundle() {
-
         const allFiles = this.files;
 
         const bundleFile = this.options.bundle.bundleFile;
