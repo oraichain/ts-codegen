@@ -8,7 +8,7 @@ import {
   contractContextBaseShortHandCtor,
   contractsContextTSX,
 } from "../helpers";
-import { BuilderContext } from "wasm-ast-types";
+import { BuilderContext } from "@oraichain/wasm-ast-types";
 
 const version = process.env.NODE_ENV === "test" ? "latest" : pkg.version;
 const header = `/**

@@ -1,14 +1,14 @@
 import { pascal } from "case";
-import { header } from '../utils/header';
+import { header } from "../utils/header";
 import { join } from "path";
 import { sync as mkdirp } from "mkdirp";
-import * as w from 'wasm-ast-types';
-import * as t from '@babel/types';
-import { writeFileSync } from 'fs';
+import * as w from "@oraichain/wasm-ast-types";
+import * as t from "@babel/types";
+import { writeFileSync } from "fs";
 import generate from "@babel/generator";
-import { ContractInfo, getMessageProperties } from "wasm-ast-types";
-import { findAndParseTypes, findExecuteMsg, findQueryMsg } from '../utils';
-import { RenderContext, TSClientOptions } from "wasm-ast-types";
+import { ContractInfo, getMessageProperties } from "@oraichain/wasm-ast-types";
+import { findAndParseTypes, findExecuteMsg, findQueryMsg } from "../utils";
+import { RenderContext, TSClientOptions } from "@oraichain/wasm-ast-types";
 import { BuilderFile } from "../builder";
 
 export default async (
@@ -17,15 +17,14 @@ export default async (
   outPath: string,
   tsClientOptions?: TSClientOptions
 ): Promise<BuilderFile[]> => {
-
   const { schemas } = contractInfo;
   const context = new RenderContext(contractInfo, {
-    client: tsClientOptions ?? {}
+    client: tsClientOptions ?? {},
   });
   // const options = context.options.client;
 
-  const localname = pascal(name) + '.client.ts';
-  const TypesFile = pascal(name) + '.types'
+  const localname = pascal(name) + ".client.ts";
+  const TypesFile = pascal(name) + ".types";
   const QueryMsg = findQueryMsg(schemas);
   const ExecuteMsg = findExecuteMsg(schemas);
   const typeHash = await findAndParseTypes(schemas);
@@ -38,13 +37,11 @@ export default async (
 
   const body = [];
 
-  body.push(
-    w.importStmt(Object.keys(typeHash), `./${TypesFile}`)
-  );
+  body.push(w.importStmt(Object.keys(typeHash), `./${TypesFile}`));
 
   if (ExecuteMsg) {
     ExecProps = getMessageProperties(ExecuteMsg);
-  }  
+  }
 
   // query messages
   if (QueryMsg) {
@@ -53,23 +50,31 @@ export default async (
 
     // if exec extend from query, should add get_ prefix to query when conflict
     let methodsCache;
-    if(context.options.client.execExtendsQuery) {
-      methodsCache = Object.fromEntries(ExecProps
-        .map((method) => Object.keys(method.properties)?.[0])
-        .filter(Boolean).map(methodName=>[methodName,true]));
+    if (context.options.client.execExtendsQuery) {
+      methodsCache = Object.fromEntries(
+        ExecProps.map((method) => Object.keys(method.properties)?.[0])
+          .filter(Boolean)
+          .map((methodName) => [methodName, true])
+      );
     }
 
-    const children = getMessageProperties(QueryMsg);    
+    const children = getMessageProperties(QueryMsg);
     body.push(
       w.createQueryInterface(context, ReadOnlyInstance, children, methodsCache)
     );
     body.push(
-      w.createQueryClass(context, QueryClient, ReadOnlyInstance, children, methodsCache)
+      w.createQueryClass(
+        context,
+        QueryClient,
+        ReadOnlyInstance,
+        children,
+        methodsCache
+      )
     );
   }
 
   // execute messages
-  if (ExecProps) {    
+  if (ExecProps) {
     if (ExecProps.length > 0) {
       Client = pascal(`${name}Client`);
       Instance = pascal(`${name}Interface`);
@@ -95,27 +100,23 @@ export default async (
     }
   }
 
-  if (typeHash.hasOwnProperty('Coin')) {
+  if (typeHash.hasOwnProperty("Coin")) {
     // @ts-ignore
     delete context.utils.Coin;
   }
   const imports = context.getImports();
-  const code = header + generate(
-    t.program([
-      ...imports,
-      ...body
-    ])
-  ).code;
+  // @ts-ignore
+  const code = header + generate(t.program([...imports, ...body])).code;
 
   mkdirp(outPath);
   writeFileSync(join(outPath, localname), code);
 
   return [
     {
-      type: 'client',
+      type: "client",
       contract: name,
       localname,
       filename: join(outPath, localname),
-    }
-  ]
+    },
+  ];
 };

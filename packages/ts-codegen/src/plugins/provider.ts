@@ -1,6 +1,10 @@
 import { pascal } from "case";
-import * as w from "wasm-ast-types";
-import { ContractInfo, RenderContextBase, RenderContext } from "wasm-ast-types";
+import * as w from "@oraichain/wasm-ast-types";
+import {
+  ContractInfo,
+  RenderContextBase,
+  RenderContext,
+} from "@oraichain/wasm-ast-types";
 import { BuilderFileType, TSBuilderOptions } from "../builder";
 import { BuilderPluginBase } from "./plugin-base";
 

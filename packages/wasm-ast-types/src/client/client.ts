@@ -48,7 +48,7 @@ export const createWasmQueryMethod = (
   methodsCache?: object
 ) => {
   const underscoreName = Object.keys(jsonschema.properties)[0];
-  const methodName = camel(methodsCache?.[underscoreName] ? context.options.client.queryPrefixOnConflict ?? 'get_' + underscoreName : underscoreName);
+  const methodName = camel(methodsCache?.[underscoreName] ? (context.options.client.queryPrefixOnConflict ?? 'get_') + underscoreName : underscoreName);
   const responseType = getResponseType(context, underscoreName);
 
   const param = createTypedObjectParams(
@@ -114,7 +114,7 @@ export const createQueryClass = (
     .map((method) => Object.keys(method.properties)?.[0])
     .filter(Boolean)
     .map(prop => {
-      if(methodsCache?.[prop]) return context.options.client.queryPrefixOnConflict ?? 'get_' + prop;
+      if(methodsCache?.[prop]) return (context.options.client.queryPrefixOnConflict ?? 'get_') + prop;
       return prop;
     });
 
@@ -513,7 +513,7 @@ export const createQueryInterface = (
 ) => {  
   const methods = props.map((jsonschema) => {
     const underscoreName = Object.keys(jsonschema.properties)[0];
-    const methodName = camel(methodsCache?.[underscoreName] ? context.options.client.queryPrefixOnConflict ?? 'get_' + underscoreName : underscoreName);
+    const methodName = camel(methodsCache?.[underscoreName] ? (context.options.client.queryPrefixOnConflict ?? 'get_') + underscoreName : underscoreName);
     const responseType = getResponseType(context, underscoreName);
     return createPropertyFunctionWithObjectParams(
       context,

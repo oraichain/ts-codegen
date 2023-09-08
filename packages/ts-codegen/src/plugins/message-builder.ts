@@ -1,15 +1,15 @@
-import { pascal } from 'case';
-import * as w from 'wasm-ast-types';
-import { findAndParseTypes, findQueryMsg, findExecuteMsg } from '../utils';
+import { pascal } from "case";
+import * as w from "@oraichain/wasm-ast-types";
+import { findAndParseTypes, findQueryMsg, findExecuteMsg } from "../utils";
 import {
   getMessageProperties,
   RenderContext,
   RenderContextBase,
   ContractInfo,
-  RenderOptions
-} from 'wasm-ast-types';
-import { BuilderFileType } from '../builder';
-import { BuilderPluginBase } from './plugin-base';
+  RenderOptions,
+} from "@oraichain/wasm-ast-types";
+import { BuilderFileType } from "../builder";
+import { BuilderPluginBase } from "./plugin-base";
 
 export class MessageBuilderPlugin extends BuilderPluginBase<RenderOptions> {
   initContext(
@@ -38,15 +38,15 @@ export class MessageBuilderPlugin extends BuilderPluginBase<RenderOptions> {
 
     const { schemas } = context.contract;
 
-    const localname = pascal(name) + '.message-builder.ts';
-    const TypesFile = pascal(name) + '.types';
+    const localname = pascal(name) + ".message-builder.ts";
+    const TypesFile = pascal(name) + ".types";
     const ExecuteMsg = findExecuteMsg(schemas);
     const typeHash = await findAndParseTypes(schemas);
 
     const body = [];
 
     body.push(w.importStmt(Object.keys(typeHash), `./${TypesFile}`));
-    body.push(w.importStmt(['CamelCasedProperties'], 'type-fest'));
+    body.push(w.importStmt(["CamelCasedProperties"], "type-fest"));
 
     // execute messages
     if (ExecuteMsg) {
@@ -54,7 +54,14 @@ export class MessageBuilderPlugin extends BuilderPluginBase<RenderOptions> {
       if (children.length > 0) {
         const className = pascal(`${name}ExecuteMsgBuilder`);
 
-        body.push(w.createMessageBuilderClass(context, className, children, ExecuteMsg.title));
+        body.push(
+          w.createMessageBuilderClass(
+            context,
+            className,
+            children,
+            ExecuteMsg.title
+          )
+        );
       }
     }
 
@@ -65,21 +72,28 @@ export class MessageBuilderPlugin extends BuilderPluginBase<RenderOptions> {
       if (children.length > 0) {
         const className = pascal(`${name}QueryMsgBuilder`);
 
-        body.push(w.createMessageBuilderClass(context, className, children, QueryMsg.title));
+        body.push(
+          w.createMessageBuilderClass(
+            context,
+            className,
+            children,
+            QueryMsg.title
+          )
+        );
       }
     }
 
-    if (typeHash.hasOwnProperty('Coin')) {
+    if (typeHash.hasOwnProperty("Coin")) {
       // @ts-ignore
       delete context.utils.Coin;
     }
 
     return [
       {
-        type: 'message-builder',
+        type: "message-builder",
         localname,
-        body
-      }
+        body,
+      },
     ];
   }
 }

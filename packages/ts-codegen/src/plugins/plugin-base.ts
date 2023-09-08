@@ -2,7 +2,7 @@ import { sync as mkdirp } from "mkdirp";
 import { join } from "path";
 import { writeFileSync } from "fs";
 import { header } from "../utils/header";
-import { ContractInfo, UtilMapping, IContext } from "wasm-ast-types";
+import { ContractInfo, UtilMapping, IContext } from "@oraichain/wasm-ast-types";
 import generate from "@babel/generator";
 import * as t from "@babel/types";
 import {
