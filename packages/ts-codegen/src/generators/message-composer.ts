@@ -46,7 +46,7 @@ export default async (
         w.createMessageComposerInterface(
           context,
           Interface,
-          ExecuteMsg
+          children
         )
       );
       body.push(
@@ -54,7 +54,7 @@ export default async (
           context,
           TheClass,
           Interface,
-          ExecuteMsg
+          children
         )
       );
     }

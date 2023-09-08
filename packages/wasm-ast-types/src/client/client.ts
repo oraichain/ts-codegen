@@ -44,10 +44,11 @@ export const CONSTANT_EXEC_PARAMS = [
 
 export const createWasmQueryMethod = (
   context: RenderContext,
-  jsonschema: any
+  jsonschema: any,
+  methodsCache?: object
 ) => {
   const underscoreName = Object.keys(jsonschema.properties)[0];
-  const methodName = camel(underscoreName);
+  const methodName = camel(methodsCache?.[underscoreName] ? context.options.client.queryPrefixOnConflict ?? 'get_' + underscoreName : underscoreName);
   const responseType = getResponseType(context, underscoreName);
 
   const param = createTypedObjectParams(
@@ -105,19 +106,23 @@ export const createQueryClass = (
   context: RenderContext,
   className: string,
   implementsClassName: string,
-  queryMsg: QueryMsg
+  props: any[],
+  methodsCache?: object
 ) => {
-  context.addUtil("CosmWasmClient");
-
-  const propertyNames = getMessageProperties(queryMsg)
+  context.addUtil("CosmWasmClient");  
+  const propertyNames = props
     .map((method) => Object.keys(method.properties)?.[0])
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(prop => {
+      if(methodsCache?.[prop]) return context.options.client.queryPrefixOnConflict ?? 'get_' + prop;
+      return prop;
+    });
 
   const bindings = propertyNames.map(camel).map(bindMethod);
 
-  const methods = getMessageProperties(queryMsg).map((schema) => {
-    return createWasmQueryMethod(context, schema);
-  });
+  const methods = props.map((schema) => {
+    return createWasmQueryMethod(context, schema, methodsCache);
+  });  
 
   return t.exportNamedDeclaration(
     classDeclaration(
@@ -294,17 +299,17 @@ export const createExecuteClass = (
   className: string,
   implementsClassName: string,
   extendsClassName: string | null,
-  execMsg: ExecuteMsg
+  props: any[]
 ) => {
   context.addUtil("SigningCosmWasmClient");
 
-  const propertyNames = getMessageProperties(execMsg)
+  const propertyNames = props
     .map((method) => Object.keys(method.properties)?.[0])
     .filter(Boolean);
 
   const bindings = propertyNames.map(camel).map(bindMethod);
 
-  const methods = getMessageProperties(execMsg).map((schema) => {
+  const methods = props.map((schema) => {
     return createWasmExecMethod(context, schema);
   });
 
@@ -411,9 +416,9 @@ export const createExecuteInterface = (
   context: RenderContext,
   className: string,
   extendsClassName: string | null,
-  execMsg: ExecuteMsg
+  props: any[]
 ) => {
-  const methods = getMessageProperties(execMsg).map((jsonschema) => {
+  const methods = props.map((jsonschema) => {
     const underscoreName = Object.keys(jsonschema.properties)[0];
     const methodName = camel(underscoreName);
     return createPropertyFunctionWithObjectParamsForExec(
@@ -503,11 +508,12 @@ export const createPropertyFunctionWithObjectParamsForExec = (
 export const createQueryInterface = (
   context: RenderContext,
   className: string,
-  queryMsg: QueryMsg
-) => {
-  const methods = getMessageProperties(queryMsg).map((jsonschema) => {
+  props: any[],
+  methodsCache?: object,
+) => {  
+  const methods = props.map((jsonschema) => {
     const underscoreName = Object.keys(jsonschema.properties)[0];
-    const methodName = camel(underscoreName);
+    const methodName = camel(methodsCache?.[underscoreName] ? context.options.client.queryPrefixOnConflict ?? 'get_' + underscoreName : underscoreName);
     const responseType = getResponseType(context, underscoreName);
     return createPropertyFunctionWithObjectParams(
       context,

@@ -58,10 +58,10 @@ export class MessageComposerPlugin extends BuilderPluginBase<RenderOptions> {
         const Interface = pascal(`${name}Msg`);
 
         body.push(
-          w.createMessageComposerInterface(context, Interface, ExecuteMsg)
+          w.createMessageComposerInterface(context, Interface, children)
         );
         body.push(
-          w.createMessageComposerClass(context, TheClass, Interface, ExecuteMsg)
+          w.createMessageComposerClass(context, TheClass, Interface, children)
         );
 
         context.addProviderInfo(

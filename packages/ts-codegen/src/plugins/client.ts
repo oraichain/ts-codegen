@@ -59,10 +59,10 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
     if (QueryMsg) {
       QueryClient = pascal(`${name}QueryClient`);
       ReadOnlyInstance = pascal(`${name}ReadOnlyInterface`);
-
-      body.push(w.createQueryInterface(context, ReadOnlyInstance, QueryMsg));
+      const children = getMessageProperties(QueryMsg);
+      body.push(w.createQueryInterface(context, ReadOnlyInstance, children));
       body.push(
-        w.createQueryClass(context, QueryClient, ReadOnlyInstance, QueryMsg)
+        w.createQueryClass(context, QueryClient, ReadOnlyInstance, children)
       );
 
       context.addProviderInfo(
@@ -85,7 +85,7 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
             context,
             Instance,
             this.option.client.execExtendsQuery ? ReadOnlyInstance : null,
-            ExecuteMsg
+            children
           )
         );
 
@@ -95,7 +95,7 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
             Client,
             Instance,
             this.option.client.execExtendsQuery ? QueryClient : null,
-            ExecuteMsg
+            children
           )
         );
 

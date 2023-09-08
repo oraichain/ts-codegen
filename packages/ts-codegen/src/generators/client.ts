@@ -34,6 +34,7 @@ export default async (
   let Instance = null;
   let QueryClient = null;
   let ReadOnlyInstance = null;
+  let ExecProps = null;
 
   const body = [];
 
@@ -41,24 +42,35 @@ export default async (
     w.importStmt(Object.keys(typeHash), `./${TypesFile}`)
   );
 
+  if (ExecuteMsg) {
+    ExecProps = getMessageProperties(ExecuteMsg);
+  }  
+
   // query messages
   if (QueryMsg) {
-
     QueryClient = pascal(`${name}QueryClient`);
     ReadOnlyInstance = pascal(`${name}ReadOnlyInterface`);
 
+    // if exec extend from query, should add get_ prefix to query when conflict
+    let methodsCache;
+    if(context.options.client.execExtendsQuery) {
+      methodsCache = Object.fromEntries(ExecProps
+        .map((method) => Object.keys(method.properties)?.[0])
+        .filter(Boolean).map(methodName=>[methodName,true]));
+    }
+
+    const children = getMessageProperties(QueryMsg);    
     body.push(
-      w.createQueryInterface(context, ReadOnlyInstance, QueryMsg)
+      w.createQueryInterface(context, ReadOnlyInstance, children, methodsCache)
     );
     body.push(
-      w.createQueryClass(context, QueryClient, ReadOnlyInstance, QueryMsg)
+      w.createQueryClass(context, QueryClient, ReadOnlyInstance, children, methodsCache)
     );
   }
 
   // execute messages
-  if (ExecuteMsg) {
-    const children = getMessageProperties(ExecuteMsg);
-    if (children.length > 0) {
+  if (ExecProps) {    
+    if (ExecProps.length > 0) {
       Client = pascal(`${name}Client`);
       Instance = pascal(`${name}Interface`);
 
@@ -67,7 +79,7 @@ export default async (
           context,
           Instance,
           context.options.client.execExtendsQuery ? ReadOnlyInstance : null,
-          ExecuteMsg
+          ExecProps
         )
       );
 
@@ -77,7 +89,7 @@ export default async (
           Client,
           Instance,
           context.options.client.execExtendsQuery ? QueryClient : null,
-          ExecuteMsg
+          ExecProps
         )
       );
     }
