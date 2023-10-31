@@ -1,13 +1,17 @@
 import { pascal } from "case";
-import { header } from '../utils/header';
+import { header } from "../utils/header";
 import { join } from "path";
 import { sync as mkdirp } from "mkdirp";
-import * as t from '@babel/types';
-import { writeFileSync } from 'fs';
+import * as t from "@babel/types";
+import { writeFileSync } from "fs";
 import generate from "@babel/generator";
 import { clean } from "../utils/clean";
-import { findAndParseTypes, findExecuteMsg, findQueryMsg } from '../utils';
-import { ContractInfo, RenderContext, TSTypesOptions } from "wasm-ast-types";
+import { findAndParseTypes, findExecuteMsg, findQueryMsg } from "../utils";
+import {
+  ContractInfo,
+  RenderContext,
+  TSTypesOptions,
+} from "@oraichain/wasm-ast-types";
 import { BuilderFile } from "../builder";
 
 export default async (
@@ -16,14 +20,13 @@ export default async (
   outPath: string,
   tsTypesOptions?: TSTypesOptions
 ): Promise<BuilderFile[]> => {
-
   const { schemas } = contractInfo;
   const context = new RenderContext(contractInfo, {
-    types: tsTypesOptions ?? {}
+    types: tsTypesOptions ?? {},
   });
   const options = context.options.types;
 
-  const localname = pascal(name) + '.types.ts';
+  const localname = pascal(name) + ".types.ts";
   const ExecuteMsg = findExecuteMsg(schemas);
   const typeHash = await findAndParseTypes(schemas);
 
@@ -31,9 +34,7 @@ export default async (
 
   // TYPES
   Object.values(typeHash).forEach((type: t.Node) => {
-    body.push(
-      clean(type)
-    )
+    body.push(clean(type));
   });
 
   // alias the ExecuteMsg (deprecated option)
@@ -43,7 +44,7 @@ export default async (
         t.tsTypeAliasDeclaration(
           t.identifier(`${name}ExecuteMsg`),
           null,
-          t.tsTypeReference(t.identifier('ExecuteMsg'))
+          t.tsTypeReference(t.identifier("ExecuteMsg"))
         )
       )
     );
@@ -63,21 +64,16 @@ export default async (
 
   if (options.aliasEntryPoints) {
     if (ExecuteMsg) {
-      addEntryPointAlias('ExecuteMsg');
+      addEntryPointAlias("ExecuteMsg");
     }
     if (findQueryMsg(schemas)) {
-      addEntryPointAlias('QueryMsg');
+      addEntryPointAlias("QueryMsg");
     }
   }
 
-
   const imports = context.getImports();
-  const code = header + generate(
-    t.program([
-      ...imports,
-      ...body
-    ])
-  ).code;
+  // @ts-ignore
+  const code = header + generate(t.program([...imports, ...body])).code;
 
   mkdirp(outPath);
   const filename = join(outPath, localname);
@@ -85,10 +81,10 @@ export default async (
 
   return [
     {
-      type: 'type',
+      type: "type",
       contract: name,
       localname,
       filename,
-    }
-  ]
+    },
+  ];
 };

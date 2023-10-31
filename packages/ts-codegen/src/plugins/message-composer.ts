@@ -1,5 +1,5 @@
 import { pascal } from "case";
-import * as w from "wasm-ast-types";
+import * as w from "@oraichain/wasm-ast-types";
 import { findAndParseTypes, findExecuteMsg } from "../utils";
 import {
   MessageComposerOptions,
@@ -8,7 +8,7 @@ import {
   RenderContextBase,
   RenderContext,
   RenderOptions,
-} from "wasm-ast-types";
+} from "@oraichain/wasm-ast-types";
 import { BuilderFileType } from "../builder";
 import { BuilderPluginBase } from "./plugin-base";
 
@@ -58,10 +58,10 @@ export class MessageComposerPlugin extends BuilderPluginBase<RenderOptions> {
         const Interface = pascal(`${name}Msg`);
 
         body.push(
-          w.createMessageComposerInterface(context, Interface, ExecuteMsg)
+          w.createMessageComposerInterface(context, Interface, children)
         );
         body.push(
-          w.createMessageComposerClass(context, TheClass, Interface, ExecuteMsg)
+          w.createMessageComposerClass(context, TheClass, Interface, children)
         );
 
         context.addProviderInfo(

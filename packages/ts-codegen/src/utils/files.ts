@@ -1,11 +1,11 @@
-import * as t from "@babel/types";
-import { parse, ParserPlugin } from "@babel/parser";
-import { sync as mkdirp } from "mkdirp";
-import { writeFileSync } from "fs";
-import { dirname } from "path";
-import generate from "@babel/generator";
-import { unused } from "./unused";
-import traverse from "@babel/traverse";
+import * as t from '@babel/types';
+import { parse, ParserPlugin } from '@babel/parser';
+import { sync as mkdirp } from 'mkdirp';
+import { writeFileSync } from 'fs';
+import { dirname } from 'path';
+import generate from '@babel/generator';
+import { unused } from './unused';
+import traverse from '@babel/traverse';
 
 export const writeAstToFile = (
   outPath: string,
@@ -16,31 +16,22 @@ export const writeAstToFile = (
   isEslintDisable = false
 ) => {
   const ast = t.program(program);
+  // @ts-ignore
   const content = generate(ast).code;
 
   if (removeUnusedImports) {
-    const plugins: ParserPlugin[] = ["typescript"];
+    const plugins: ParserPlugin[] = ['typescript'];
     const newAst = parse(content, {
-      sourceType: "module",
-      plugins,
+      sourceType: 'module',
+      plugins
     });
+    // @ts-ignore
     traverse(newAst, unused);
+    // @ts-ignore
     const content2 = generate(newAst).code;
-    writeContentToFile(
-      outPath,
-      content2,
-      filename,
-      isTsDisable,
-      isEslintDisable
-    );
+    writeContentToFile(outPath, content2, filename, isTsDisable, isEslintDisable);
   } else {
-    writeContentToFile(
-      outPath,
-      content,
-      filename,
-      isTsDisable,
-      isEslintDisable
-    );
+    writeContentToFile(outPath, content, filename, isTsDisable, isEslintDisable);
   }
 };
 
@@ -51,13 +42,12 @@ export const writeContentToFile = (
   isTsDisable = false,
   isEslintDisable = false
 ) => {
-  let esLintPrefix = "";
-  let tsLintPrefix = "";
+  let esLintPrefix = '';
+  let tsLintPrefix = '';
 
-  let nameWithoutPath = filename.replace(outPath, "");
+  let nameWithoutPath = filename.replace(outPath, '');
   // strip off leading slash
-  if (nameWithoutPath.startsWith("/"))
-    nameWithoutPath = nameWithoutPath.replace(/^\//, "");
+  if (nameWithoutPath.startsWith('/')) nameWithoutPath = nameWithoutPath.replace(/^\//, '');
 
   if (isTsDisable) {
     tsLintPrefix = `//@ts-nocheck\n`;

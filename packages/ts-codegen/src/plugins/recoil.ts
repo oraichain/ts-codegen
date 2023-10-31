@@ -1,19 +1,19 @@
-import { pascal } from 'case';
-import * as w from 'wasm-ast-types';
-import { findAndParseTypes, findQueryMsg } from '../utils';
+import { pascal } from "case";
+import * as w from "@oraichain/wasm-ast-types";
+import { findAndParseTypes, findQueryMsg } from "../utils";
 import {
   ContractInfo,
   RenderContext,
   RenderContextBase,
   UtilMapping,
-  RenderOptions
-} from 'wasm-ast-types';
-import { BuilderFileType } from '../builder';
-import { BuilderPluginBase } from './plugin-base';
+  RenderOptions,
+} from "@oraichain/wasm-ast-types";
+import { BuilderFileType } from "../builder";
+import { BuilderPluginBase } from "./plugin-base";
 
 export class RecoilPlugin extends BuilderPluginBase<RenderOptions> {
   utils: UtilMapping = {
-    selectorFamily: 'recoil',
+    selectorFamily: "recoil",
   };
   initContext(
     contract: ContractInfo,
@@ -41,9 +41,9 @@ export class RecoilPlugin extends BuilderPluginBase<RenderOptions> {
 
     const { schemas } = context.contract;
 
-    const localname = pascal(name) + '.recoil.ts';
-    const ContractFile = pascal(name) + '.client';
-    const TypesFile = pascal(name) + '.types';
+    const localname = pascal(name) + ".recoil.ts";
+    const ContractFile = pascal(name) + ".client";
+    const TypesFile = pascal(name) + ".types";
 
     const QueryMsg = findQueryMsg(schemas);
     const typeHash = await findAndParseTypes(schemas);
@@ -53,7 +53,7 @@ export class RecoilPlugin extends BuilderPluginBase<RenderOptions> {
 
     const body = [];
 
-    body.push(w.importStmt(['cosmWasmClient'], './chain'));
+    body.push(w.importStmt(["cosmWasmClient"], "./chain"));
 
     body.push(w.importStmt(Object.keys(typeHash), `./${TypesFile}`));
 
@@ -73,17 +73,17 @@ export class RecoilPlugin extends BuilderPluginBase<RenderOptions> {
       );
     }
 
-    if (typeHash.hasOwnProperty('Coin')) {
+    if (typeHash.hasOwnProperty("Coin")) {
       // @ts-ignore
       delete context.utils.Coin;
     }
 
     return [
       {
-        type: 'recoil',
+        type: "recoil",
         localname,
-        body
-      }
+        body,
+      },
     ];
   }
 }

@@ -1,6 +1,10 @@
 import { pascal } from "case";
-import * as w from "wasm-ast-types";
-import { ContractInfo, RenderContextBase, RenderContext } from "wasm-ast-types";
+import * as w from "@oraichain/wasm-ast-types";
+import {
+  ContractInfo,
+  RenderContextBase,
+  RenderContext,
+} from "@oraichain/wasm-ast-types";
 import { BuilderFileType, TSBuilderOptions } from "../builder";
 import { BuilderPluginBase } from "./plugin-base";
 import { GetLocalBaseNameByContractName } from "./provider";
@@ -65,12 +69,7 @@ export class ContractsProviderBundlePlugin extends BuilderPluginBase<TSBuilderOp
           if (Object.prototype.hasOwnProperty.call(providerInfo, key)) {
             const info = providerInfo[key];
 
-            body.push(
-              w.importStmt(
-                [info.classname],
-                `./${info.basename}`
-              )
-            );
+            body.push(w.importStmt([info.classname], `./${info.basename}`));
           }
         }
 

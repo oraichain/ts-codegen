@@ -5,8 +5,7 @@ import {
   arrowFunctionExpression,
   bindMethod,
   classDeclaration,
-  classProperty,
-  getMessageProperties,
+  classProperty,  
   OPTIONAL_FUNDS_PARAM,
   typedIdentifier
 } from '../utils';
@@ -128,15 +127,15 @@ export const createMessageComposerClass = (
   context: RenderContext,
   className: string,
   implementsClassName: string,
-  execMsg: ExecuteMsg
+  props: any[]
 ) => {
-  const propertyNames = getMessageProperties(execMsg)
+  const propertyNames = props
     .map((method) => Object.keys(method.properties)?.[0])
     .filter(Boolean);
 
   const bindings = propertyNames.map(camel).map(bindMethod);
 
-  const methods = getMessageProperties(execMsg).map((schema) => {
+  const methods = props.map((schema) => {
     return createWasmExecMethodMessageComposer(context, schema);
   });
 
@@ -197,9 +196,9 @@ export const createMessageComposerClass = (
 export const createMessageComposerInterface = (
   context: RenderContext,
   className: string,
-  execMsg: ExecuteMsg
+  props: any[]
 ) => {
-  const methods = getMessageProperties(execMsg).map((jsonschema) => {
+  const methods = props.map((jsonschema) => {
     const underscoreName = Object.keys(jsonschema.properties)[0];
     const methodName = camel(underscoreName);
     return createPropertyFunctionWithObjectParamsForMessageComposer(

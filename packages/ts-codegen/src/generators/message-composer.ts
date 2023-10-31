@@ -1,14 +1,17 @@
 import { pascal } from "case";
-import { header } from '../utils/header';
+import { header } from "../utils/header";
 import { join } from "path";
 import { sync as mkdirp } from "mkdirp";
-import * as w from 'wasm-ast-types';
-import * as t from '@babel/types';
-import { writeFileSync } from 'fs';
+import * as w from "@oraichain/wasm-ast-types";
+import * as t from "@babel/types";
+import { writeFileSync } from "fs";
 import generate from "@babel/generator";
-import { ContractInfo, getMessageProperties } from "wasm-ast-types";
+import { ContractInfo, getMessageProperties } from "@oraichain/wasm-ast-types";
 import { findAndParseTypes, findExecuteMsg } from "../utils";
-import { RenderContext, MessageComposerOptions } from "wasm-ast-types";
+import {
+  RenderContext,
+  MessageComposerOptions,
+} from "@oraichain/wasm-ast-types";
 import { BuilderFile } from "../builder";
 
 export default async (
@@ -17,23 +20,20 @@ export default async (
   outPath: string,
   messageComposerOptions?: MessageComposerOptions
 ): Promise<BuilderFile[]> => {
-
   const { schemas } = contractInfo;
   const context = new RenderContext(contractInfo, {
-    messageComposer: messageComposerOptions ?? {}
+    messageComposer: messageComposerOptions ?? {},
   });
   // const options = context.options.messageComposer;
 
-  const localname = pascal(name) + '.message-composer.ts';
-  const TypesFile = pascal(name) + '.types';
+  const localname = pascal(name) + ".message-composer.ts";
+  const TypesFile = pascal(name) + ".types";
   const ExecuteMsg = findExecuteMsg(schemas);
   const typeHash = await findAndParseTypes(schemas);
 
   const body = [];
 
-  body.push(
-    w.importStmt(Object.keys(typeHash), `./${TypesFile}`)
-  );
+  body.push(w.importStmt(Object.keys(typeHash), `./${TypesFile}`));
 
   // execute messages
   if (ExecuteMsg) {
@@ -42,45 +42,30 @@ export default async (
       const TheClass = pascal(`${name}MessageComposer`);
       const Interface = pascal(`${name}Message`);
 
+      body.push(w.createMessageComposerInterface(context, Interface, children));
       body.push(
-        w.createMessageComposerInterface(
-          context,
-          Interface,
-          ExecuteMsg
-        )
-      );
-      body.push(
-        w.createMessageComposerClass(
-          context,
-          TheClass,
-          Interface,
-          ExecuteMsg
-        )
+        w.createMessageComposerClass(context, TheClass, Interface, children)
       );
     }
   }
 
-  if (typeHash.hasOwnProperty('Coin')) {
+  if (typeHash.hasOwnProperty("Coin")) {
     // @ts-ignore
     delete context.utils.Coin;
   }
   const imports = context.getImports();
-  const code = header + generate(
-    t.program([
-      ...imports,
-      ...body
-    ])
-  ).code;
+  // @ts-ignore
+  const code = header + generate(t.program([...imports, ...body])).code;
 
   mkdirp(outPath);
   writeFileSync(join(outPath, localname), code);
 
   return [
     {
-      type: 'message-composer',
+      type: "message-composer",
       contract: name,
       localname,
       filename: join(outPath, localname),
-    }
-  ]
+    },
+  ];
 };

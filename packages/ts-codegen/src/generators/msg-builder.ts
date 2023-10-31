@@ -2,13 +2,16 @@ import { pascal } from "case";
 import { header } from "../utils/header";
 import { join } from "path";
 import { sync as mkdirp } from "mkdirp";
-import * as w from "wasm-ast-types";
+import * as w from "@oraichain/wasm-ast-types";
 import * as t from "@babel/types";
 import { writeFileSync } from "fs";
 import generate from "@babel/generator";
-import { ContractInfo, getMessageProperties } from "wasm-ast-types";
-import { findAndParseTypes, findExecuteMsg, findQueryMsg } from '../utils';
-import { RenderContext, MessageBuilderOptions } from 'wasm-ast-types';
+import { ContractInfo, getMessageProperties } from "@oraichain/wasm-ast-types";
+import { findAndParseTypes, findExecuteMsg, findQueryMsg } from "../utils";
+import {
+  RenderContext,
+  MessageBuilderOptions,
+} from "@oraichain/wasm-ast-types";
 import { BuilderFile } from "../builder";
 
 export default async (
@@ -39,7 +42,12 @@ export default async (
       const className = pascal(`${name}ExecuteMsgBuilder`);
 
       body.push(
-        w.createMessageBuilderClass(context, className, ExecuteMsg)
+        w.createMessageBuilderClass(
+          context,
+          className,
+          children,
+          ExecuteMsg.title
+        )
       );
     }
   }
@@ -52,7 +60,12 @@ export default async (
       const className = pascal(`${name}QueryMsgBuilder`);
 
       body.push(
-        w.createMessageBuilderClass(context, className, QueryMsg)
+        w.createMessageBuilderClass(
+          context,
+          className,
+          children,
+          QueryMsg.title
+        )
       );
     }
   }
@@ -62,6 +75,7 @@ export default async (
     delete context.utils.Coin;
   }
   const imports = context.getImports();
+  // @ts-ignore
   const code = header + generate(t.program([...imports, ...body])).code;
 
   mkdirp(outPath);

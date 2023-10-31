@@ -1,5 +1,5 @@
 import { pascal } from "case";
-import * as w from "wasm-ast-types";
+import * as w from "@oraichain/wasm-ast-types";
 import { findExecuteMsg, findAndParseTypes, findQueryMsg } from "../utils";
 import {
   RenderContext,
@@ -7,7 +7,7 @@ import {
   RenderContextBase,
   getMessageProperties,
   RenderOptions,
-} from "wasm-ast-types";
+} from "@oraichain/wasm-ast-types";
 import { BuilderFileType } from "../builder";
 import { BuilderPluginBase } from "./plugin-base";
 
@@ -50,19 +50,36 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
     let Instance = null;
     let QueryClient = null;
     let ReadOnlyInstance = null;
+    let ExecProps = null;
 
     const body = [];
 
     body.push(w.importStmt(Object.keys(typeHash), `./${TypesFile}`));
 
+    if (ExecuteMsg) {
+      ExecProps = getMessageProperties(ExecuteMsg);
+    }
+
     // query messages
     if (QueryMsg) {
       QueryClient = pascal(`${name}QueryClient`);
       ReadOnlyInstance = pascal(`${name}ReadOnlyInterface`);
+      
 
-      body.push(w.createQueryInterface(context, ReadOnlyInstance, QueryMsg));
+      // if exec extend from query, should add get_ prefix to query when conflict
+      let methodsCache;
+      if (context.options.client.execExtendsQuery) {
+        methodsCache = Object.fromEntries(
+          ExecProps.map((method) => Object.keys(method.properties)?.[0])
+            .filter(Boolean)
+            .map((methodName) => [methodName, true])
+        );
+      }
+
+      const children = getMessageProperties(QueryMsg);
+      body.push(w.createQueryInterface(context, ReadOnlyInstance, children, methodsCache));
       body.push(
-        w.createQueryClass(context, QueryClient, ReadOnlyInstance, QueryMsg)
+        w.createQueryClass(context, QueryClient, ReadOnlyInstance, children, methodsCache)
       );
 
       context.addProviderInfo(
@@ -85,7 +102,7 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
             context,
             Instance,
             this.option.client.execExtendsQuery ? ReadOnlyInstance : null,
-            ExecuteMsg
+            children
           )
         );
 
@@ -95,7 +112,7 @@ export class ClientPlugin extends BuilderPluginBase<RenderOptions> {
             Client,
             Instance,
             this.option.client.execExtendsQuery ? QueryClient : null,
-            ExecuteMsg
+            children
           )
         );
 

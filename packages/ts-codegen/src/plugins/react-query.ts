@@ -1,15 +1,15 @@
-import { pascal } from 'case';
-import * as w from 'wasm-ast-types';
-import { findAndParseTypes, findExecuteMsg, findQueryMsg } from '../utils';
+import { pascal } from "case";
+import * as w from "@oraichain/wasm-ast-types";
+import { findAndParseTypes, findExecuteMsg, findQueryMsg } from "../utils";
 import {
   getMessageProperties,
   ContractInfo,
   RenderOptions,
   RenderContextBase,
-  RenderContext
-} from 'wasm-ast-types';
-import { BuilderFileType } from '../builder';
-import { BuilderPluginBase } from './plugin-base';
+  RenderContext,
+} from "@oraichain/wasm-ast-types";
+import { BuilderFileType } from "../builder";
+import { BuilderPluginBase } from "./plugin-base";
 
 export class ReactQueryPlugin extends BuilderPluginBase<RenderOptions> {
   initContext(
@@ -40,9 +40,9 @@ export class ReactQueryPlugin extends BuilderPluginBase<RenderOptions> {
 
     const { schemas } = context.contract;
 
-    const localname = pascal(`${name}`) + '.react-query.ts';
-    const ContractFile = pascal(`${name}`) + '.client';
-    const TypesFile = pascal(`${name}`) + '.types';
+    const localname = pascal(`${name}`) + ".react-query.ts";
+    const ContractFile = pascal(`${name}`) + ".client";
+    const TypesFile = pascal(`${name}`) + ".types";
 
     const QueryMsg = findQueryMsg(schemas);
     const ExecuteMsg = findExecuteMsg(schemas);
@@ -60,7 +60,7 @@ export class ReactQueryPlugin extends BuilderPluginBase<RenderOptions> {
     // check that there are commands within the exec msg
     const shouldGenerateMutationHooks =
       ExecuteMsg &&
-      options?.version === 'v4' &&
+      options?.version === "v4" &&
       options?.mutations &&
       getMessageProperties(ExecuteMsg).length > 0;
 
@@ -82,7 +82,7 @@ export class ReactQueryPlugin extends BuilderPluginBase<RenderOptions> {
           context,
           queryMsg: QueryMsg,
           contractName: name,
-          QueryClient
+          QueryClient,
         })
       );
     }
@@ -94,22 +94,22 @@ export class ReactQueryPlugin extends BuilderPluginBase<RenderOptions> {
           context,
           execMsg: ExecuteMsg,
           contractName: name,
-          ExecuteClient
+          ExecuteClient,
         })
       );
     }
 
-    if (typeHash.hasOwnProperty('Coin')) {
+    if (typeHash.hasOwnProperty("Coin")) {
       // @ts-ignore
       delete context.utils.Coin;
     }
 
     return [
       {
-        type: 'react-query',
+        type: "react-query",
         localname,
-        body
-      }
+        body,
+      },
     ];
   }
 }

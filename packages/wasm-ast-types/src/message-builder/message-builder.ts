@@ -10,10 +10,11 @@ import { Expression } from '@babel/types';
 export const createMessageBuilderClass = (
   context: RenderContext,
   className: string,
-  msg: ExecuteMsg | QueryMsg
+  props: any[],
+  title: string
 ): t.ExportNamedDeclaration => {
-  const staticMethods = getMessageProperties(msg).map((schema) => {
-    return createStaticExecMethodMessageBuilder(context, schema, msg.title);
+  const staticMethods = props.map((schema) => {
+    return createStaticExecMethodMessageBuilder(context, schema, title);
   });
 
   // const blockStmt = bindings;
