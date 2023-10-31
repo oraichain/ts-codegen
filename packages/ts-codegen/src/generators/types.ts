@@ -72,6 +72,7 @@ export default async (
   }
 
   const imports = context.getImports();
+  // @ts-ignore
   const code = header + generate(t.program([...imports, ...body])).code;
 
   mkdirp(outPath);

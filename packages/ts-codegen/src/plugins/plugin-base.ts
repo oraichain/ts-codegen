@@ -1,16 +1,11 @@
-import { sync as mkdirp } from "mkdirp";
-import { join } from "path";
-import { writeFileSync } from "fs";
-import { header } from "../utils/header";
-import { ContractInfo, UtilMapping, IContext } from "@oraichain/wasm-ast-types";
-import generate from "@babel/generator";
-import * as t from "@babel/types";
-import {
-  BuilderFile,
-  BuilderFileType,
-  TSBuilder,
-  TSBuilderOptions,
-} from "../builder";
+import { sync as mkdirp } from 'mkdirp';
+import { join } from 'path';
+import { writeFileSync } from 'fs';
+import { header } from '../utils/header';
+import { ContractInfo, UtilMapping, IContext } from '@oraichain/wasm-ast-types';
+import generate from '@babel/generator';
+import * as t from '@babel/types';
+import { BuilderFile, BuilderFileType, TSBuilder, TSBuilderOptions } from '../builder';
 
 /**
  * IBuilderPlugin is a common plugin that render generated code.
@@ -32,19 +27,13 @@ export interface IBuilderPlugin {
    * @param outPath the path of generated code.
    * @returns info of generated files.
    */
-  render(
-    name: string,
-    contractInfo: ContractInfo,
-    outPath: string
-  ): Promise<BuilderFile[]>;
+  render(name: string, contractInfo: ContractInfo, outPath: string): Promise<BuilderFile[]>;
 }
 
 /**
  * BuilderPluginBase enable ts-codegen users implement their own plugins by only implement a few functions.
  */
-export abstract class BuilderPluginBase<TOpt extends { enabled?: boolean }>
-  implements IBuilderPlugin
-{
+export abstract class BuilderPluginBase<TOpt extends { enabled?: boolean }> implements IBuilderPlugin {
   builder?: TSBuilder;
   option: TOpt;
   utils: UtilMapping;
@@ -58,11 +47,7 @@ export abstract class BuilderPluginBase<TOpt extends { enabled?: boolean }>
     this.builder = builder;
   }
 
-  async render(
-    name: string,
-    contractInfo: ContractInfo,
-    outPath: string
-  ): Promise<BuilderFile[]> {
+  async render(name: string, contractInfo: ContractInfo, outPath: string): Promise<BuilderFile[]> {
     const { enabled } = this.option;
 
     if (!enabled) {
@@ -80,6 +65,7 @@ export abstract class BuilderPluginBase<TOpt extends { enabled?: boolean }>
     return results.map((result) => {
       const imports = context.getImports(this.utils, result.localname);
       const code =
+        // @ts-ignore
         header + generate(t.program([...imports, ...result.body])).code;
 
       mkdirp(outPath);
@@ -91,7 +77,7 @@ export abstract class BuilderPluginBase<TOpt extends { enabled?: boolean }>
         pluginType: result.pluginType,
         contract: name,
         localname: result.localname,
-        filename,
+        filename
       };
     });
   }
