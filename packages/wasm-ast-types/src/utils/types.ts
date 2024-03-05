@@ -5,59 +5,47 @@ import { TSTypeAnnotation } from '@babel/types';
 import { RenderContext } from '../context';
 import { JSONSchema } from '../types';
 
-export function getResponseType(
-  context: RenderContext,
-  underscoreName: string
-) {
+export function getResponseType(context: RenderContext, underscoreName: string) {
   const methodName = camel(underscoreName);
   return pascal(
-    context.contract?.responses?.[underscoreName]?.title
-    ??
-    // after v1.1 is adopted, we can deprecate this and require the above response
-    `${methodName}Response`
+    context.contract?.responses?.[underscoreName]?.title ??
+      // after v1.1 is adopted, we can deprecate this and require the above response
+      `${methodName}Response`
   );
-};
+}
 
 const getTypeStrFromRef = ($ref) => {
   if ($ref?.startsWith('#/definitions/')) {
     return $ref.replace('#/definitions/', '');
   }
   throw new Error('what is $ref: ' + $ref);
-}
+};
 
 export const getTypeFromRef = ($ref) => {
-  return t.tsTypeReference(t.identifier(getTypeStrFromRef($ref)))
-}
+  return t.tsTypeReference(t.identifier(getTypeStrFromRef($ref)));
+};
 
 const getArrayTypeFromRef = ($ref) => {
-  return t.tsArrayType(
-    getTypeFromRef($ref)
-  );
-}
+  return t.tsArrayType(getTypeFromRef($ref));
+};
 
 const getTypeOrRef = (obj) => {
   if (obj.type) {
-    return getType(obj.type)
+    return getType(obj.type);
   }
   if (obj.$ref) {
     return getTypeFromRef(obj.$ref);
   }
-  throw new Error('contact maintainers cannot find type for ' + obj)
-}
+  throw new Error('contact maintainers cannot find type for ' + obj);
+};
 
 const getArrayTypeFromItems = (items) => {
   // passing in [{"type":"string"}]
   if (Array.isArray(items)) {
     if (items[0]?.type === 'array') {
-      return getArrayTypeFromItems(
-        items[0]
-      );
+      return getArrayTypeFromItems(items[0]);
     }
-    return t.tsArrayType(
-      t.tsArrayType(
-        getTypeOrRef(items[0])
-      )
-    );
+    return t.tsArrayType(t.tsArrayType(getTypeOrRef(items[0])));
   }
 
   // passing in {"items": [{"type":"string"}]}
@@ -65,37 +53,25 @@ const getArrayTypeFromItems = (items) => {
 
   if (detect.type === 'array') {
     if (Array.isArray(items.items)) {
-      return t.tsArrayType(
-        t.tsArrayType(
-          getTypeOrRef(items.items[0])
-        )
-      );
+      return t.tsArrayType(t.tsArrayType(getTypeOrRef(items.items[0])));
     } else {
-      return t.tsArrayType(
-        getArrayTypeFromItems(
-          items.items
-        )
-      );
+      return t.tsArrayType(getArrayTypeFromItems(items.items));
     }
   }
 
-
-  return t.tsArrayType(
-    getType(detect.type)
-  );
-}
-
+  return t.tsArrayType(getType(detect.type));
+};
 
 export const detectType = (type: string | string[]) => {
   let optional = false;
   let theType = '';
   if (Array.isArray(type)) {
     if (type.length !== 2) {
-      throw new Error('[getType(array length)] case not handled by transpiler. contact maintainers.')
+      throw new Error('[getType(array length)] case not handled by transpiler. contact maintainers.');
     }
     const [nullableType, nullType] = type;
     if (nullType !== 'null') {
-      throw new Error('[getType(null)] case not handled by transpiler. contact maintainers.')
+      throw new Error('[getType(null)] case not handled by transpiler. contact maintainers.');
     }
     theType = nullableType;
     optional = true;
@@ -107,7 +83,7 @@ export const detectType = (type: string | string[]) => {
     type: theType,
     optional
   };
-}
+};
 
 export const getTypeInfo = (info: JSONSchema) => {
   let type = undefined;
@@ -116,17 +92,17 @@ export const getTypeInfo = (info: JSONSchema) => {
   if (Array.isArray(info.anyOf)) {
     // assuming 2nd is null, but let's check to ensure
     if (info.anyOf.length !== 2) {
-      throw new Error('case not handled by transpiler. contact maintainers.')
+      throw new Error('case not handled by transpiler. contact maintainers.');
     }
     const [nullableType, nullType] = info.anyOf;
     if (nullType?.type !== 'null') {
-      throw new Error('[nullableType.type]: case not handled by transpiler. contact maintainers.')
+      throw new Error('[nullableType.type]: case not handled by transpiler. contact maintainers.');
     }
     if (!nullableType?.$ref) {
       if (nullableType.title) {
         type = t.tsTypeReference(t.identifier(nullableType.title));
       } else {
-        throw new Error('[nullableType.title] case not handled by transpiler. contact maintainers.')
+        throw new Error('[nullableType.title] case not handled by transpiler. contact maintainers.');
       }
     } else {
       type = getTypeFromRef(nullableType?.$ref);
@@ -134,22 +110,17 @@ export const getTypeInfo = (info: JSONSchema) => {
     optional = true;
   }
 
-
   if (typeof info.type === 'string') {
     if (info.type === 'array') {
       if (typeof info.items === 'object' && !Array.isArray(info.items)) {
         if (info.items.$ref) {
           type = getArrayTypeFromRef(info.items.$ref);
         } else if (info.items.title) {
-          type = t.tsArrayType(
-            t.tsTypeReference(
-              t.identifier(info.items.title)
-            )
-          );
+          type = t.tsArrayType(t.tsTypeReference(t.identifier(info.items.title)));
         } else if (info.items.type) {
           type = getArrayTypeFromItems(info.items);
         } else {
-          throw new Error('[info.items] case not handled by transpiler. contact maintainers.')
+          throw new Error('[info.items] case not handled by transpiler. contact maintainers.');
         }
       } else {
         if (Array.isArray(info.items)) {
@@ -158,7 +129,7 @@ export const getTypeInfo = (info: JSONSchema) => {
           // console.log(Array.isArray(info.items));
           // console.log(info);
         } else {
-          throw new Error('[info.items] case not handled by transpiler. contact maintainers.')
+          throw new Error('[info.items] case not handled by transpiler. contact maintainers.');
         }
       }
     } else {
@@ -171,26 +142,21 @@ export const getTypeInfo = (info: JSONSchema) => {
   if (Array.isArray(info.type)) {
     // assuming 2nd is null, but let's check to ensure
     if (info.type.length !== 2) {
-      throw new Error('please report this to maintainers (field type): ' + JSON.stringify(info, null, 2))
+      throw new Error('please report this to maintainers (field type): ' + JSON.stringify(info, null, 2));
     }
     const [nullableType, nullType] = info.type;
     if (nullType !== 'null') {
-      throw new Error('please report this to maintainers (field type): ' + JSON.stringify(info, null, 2))
+      throw new Error('please report this to maintainers (field type): ' + JSON.stringify(info, null, 2));
     }
 
     if (nullableType === 'array' && typeof info.items === 'object' && !Array.isArray(info.items)) {
-
       if (info.items.type) {
         const detect = detectType(info.items.type);
         if (detect.type === 'array') {
           // wen recursion?
-          type = t.tsArrayType(
-            getArrayTypeFromItems(info.items)
-          );
+          type = t.tsArrayType(getArrayTypeFromItems(info.items));
         } else {
-          type = t.tsArrayType(
-            getType(detect.type)
-          );
+          type = t.tsArrayType(getType(detect.type));
         }
         optional = detect.optional;
       } else if (info.items.$ref) {
@@ -204,20 +170,16 @@ export const getTypeInfo = (info: JSONSchema) => {
       } else if (info.items.type) {
         type = getArrayTypeFromItems(info.items);
       } else {
-        throw new Error('[info.items] case not handled by transpiler. contact maintainers.')
+        throw new Error('[info.items] case not handled by transpiler. contact maintainers.');
       }
-
     } else {
       const detect = detectType(nullableType);
       optional = detect.optional;
       if (detect.type === 'array') {
-        type = getArrayTypeFromItems(
-          info.items
-        );
+        type = getArrayTypeFromItems(info.items);
       } else {
         type = getType(detect.type);
       }
-
     }
 
     optional = true;
@@ -227,9 +189,7 @@ export const getTypeInfo = (info: JSONSchema) => {
     type,
     optional
   };
-
-}
-
+};
 
 export const getType = (type: string) => {
   switch (type) {
@@ -242,13 +202,9 @@ export const getType = (type: string) => {
     default:
       throw new Error('contact maintainers [unknown type]: ' + type);
   }
-}
+};
 
-export const getPropertyType = (
-  context: RenderContext,
-  schema: JSONSchema,
-  prop: string
-) => {
+export const getPropertyType = (context: RenderContext, schema: JSONSchema, prop: string) => {
   const props = schema.properties ?? {};
   let info = props[prop];
 
@@ -260,7 +216,7 @@ export const getPropertyType = (
   }
 
   if (typeof info.$ref === 'string') {
-    type = getTypeFromRef(info.$ref)
+    type = getTypeFromRef(info.$ref);
   }
 
   const typeInfo = getTypeInfo(info);
@@ -272,7 +228,7 @@ export const getPropertyType = (
   }
 
   if (!type) {
-    throw new Error('cannot find type for ' + JSON.stringify(info))
+    throw new Error('cannot find type for ' + JSON.stringify(info));
   }
 
   if (schema.required?.includes(prop)) {
@@ -281,7 +237,6 @@ export const getPropertyType = (
 
   return { type, optional };
 };
-
 
 export function getPropertySignatureFromProp(
   context: RenderContext,
@@ -293,18 +248,21 @@ export function getPropertySignatureFromProp(
     if (jsonschema.properties[prop].title) {
       return propertySignature(
         camelize ? camel(prop) : prop,
-        t.tsTypeAnnotation(
-          t.tsTypeReference(t.identifier(jsonschema.properties[prop].title))
-        )
+        t.tsTypeAnnotation(t.tsTypeReference(t.identifier(jsonschema.properties[prop].title)))
       );
     } else {
+      const def = jsonschema.properties[prop].additionalProperties['$ref'];
+      if (def) {
+        const identifier = t.identifier(`{ [k: string]: ${def.replace('#/definitions/', '')} }`);
+        return propertySignature(camelize ? camel(prop) : prop, t.tsTypeAnnotation(t.tsTypeReference(identifier)));
+      }
       throw new Error('getPropertySignatureFromProp() contact maintainer');
     }
   }
 
   if (Array.isArray(jsonschema.properties[prop].allOf)) {
     const isOptional = !jsonschema.required?.includes(prop);
-    const unionTypes = jsonschema.properties[prop].allOf.map(el => {
+    const unionTypes = jsonschema.properties[prop].allOf.map((el) => {
       if (el.title) return el.title;
       if (el.$ref) return getTypeStrFromRef(el.$ref);
       return el.type;
@@ -315,31 +273,19 @@ export function getPropertySignatureFromProp(
     if (uniqUnionTypes.length === 1) {
       return propertySignature(
         camelize ? camel(prop) : prop,
-        t.tsTypeAnnotation(
-          t.tsTypeReference(
-            t.identifier(uniqUnionTypes[0])
-          )
-        ),
+        t.tsTypeAnnotation(t.tsTypeReference(t.identifier(uniqUnionTypes[0]))),
         isOptional
       );
     } else {
       return propertySignature(
         camelize ? camel(prop) : prop,
-        t.tsTypeAnnotation(
-          t.tsUnionType(
-            uniqUnionTypes.map(typ =>
-              t.tsTypeReference(
-                t.identifier(typ)
-              )
-            )
-          )
-        ),
+        t.tsTypeAnnotation(t.tsUnionType(uniqUnionTypes.map((typ) => t.tsTypeReference(t.identifier(typ))))),
         isOptional
       );
     }
   } else if (Array.isArray(jsonschema.properties[prop].oneOf)) {
     const isOptional = !jsonschema.required?.includes(prop);
-    const unionTypes = jsonschema.properties[prop].oneOf.map(el => {
+    const unionTypes = jsonschema.properties[prop].oneOf.map((el) => {
       if (el.title) return el.title;
       if (el.$ref) return getTypeStrFromRef(el.$ref);
       return el.type;
@@ -349,29 +295,16 @@ export function getPropertySignatureFromProp(
     if (uniqUnionTypes.length === 1) {
       return propertySignature(
         camelize ? camel(prop) : prop,
-        t.tsTypeAnnotation(
-          t.tsTypeReference(
-            t.identifier(uniqUnionTypes[0])
-          )
-        ),
+        t.tsTypeAnnotation(t.tsTypeReference(t.identifier(uniqUnionTypes[0]))),
         isOptional
       );
     } else {
       return propertySignature(
         camelize ? camel(prop) : prop,
-        t.tsTypeAnnotation(
-          t.tsUnionType(
-            uniqUnionTypes.map(typ =>
-              t.tsTypeReference(
-                t.identifier(typ)
-              )
-            )
-          )
-        ),
+        t.tsTypeAnnotation(t.tsUnionType(uniqUnionTypes.map((typ) => t.tsTypeReference(t.identifier(typ))))),
         isOptional
       );
     }
-
   }
 
   try {
@@ -382,13 +315,7 @@ export function getPropertySignatureFromProp(
   }
 
   const { type, optional } = getPropertyType(context, jsonschema, prop);
-  return propertySignature(
-    camelize ? camel(prop) : prop,
-    t.tsTypeAnnotation(
-      type
-    ),
-    optional
-  );
+  return propertySignature(camelize ? camel(prop) : prop, t.tsTypeAnnotation(type), optional);
 }
 
 export const getParamsTypeAnnotation = (
@@ -399,34 +326,26 @@ export const getParamsTypeAnnotation = (
   const keys = Object.keys(jsonschema.properties ?? {});
 
   if (!keys.length && jsonschema.$ref) {
-    return t.tsTypeAnnotation(getTypeFromRef(jsonschema.$ref))
+    return t.tsTypeAnnotation(getTypeFromRef(jsonschema.$ref));
   }
 
   if (!keys.length) return undefined;
 
-  const typedParams = keys.map(prop => getPropertySignatureFromProp(
-    context,
-    jsonschema,
-    prop,
-    camelize
-  ));
+  const typedParams = keys.map((prop) => getPropertySignatureFromProp(context, jsonschema, prop, camelize));
 
   return t.tsTypeAnnotation(
     t.tsTypeLiteral(
       // @ts-ignore:next-line
-      [
-        ...typedParams
-      ]
+      [...typedParams]
     )
-  )
-}
+  );
+};
 
 export const createTypedObjectParams = (
   context: RenderContext,
   jsonschema: JSONSchema,
   camelize: boolean = true
-): (t.Identifier | t.Pattern | t.RestElement) => {
-
+): t.Identifier | t.Pattern | t.RestElement => {
   const keys = Object.keys(jsonschema.properties ?? {});
   if (!keys.length) {
     // is there a ref?
@@ -439,13 +358,9 @@ export const createTypedObjectParams = (
         const refName = camel(refType);
         const id = t.identifier(refName);
         id.typeAnnotation = t.tsTypeAnnotation(t.tsTypeReference(t.identifier(refType)));
-        return id
+        return id;
       } else if (obj) {
-        return createTypedObjectParams(
-          context,
-          obj,
-          camelize
-        );
+        return createTypedObjectParams(context, obj, camelize);
       }
     }
 
@@ -453,7 +368,7 @@ export const createTypedObjectParams = (
     return;
   }
 
-  const params = keys.map(prop => {
+  const params = keys.map((prop) => {
     return t.objectProperty(
       camelize ? t.identifier(camel(prop)) : t.identifier(prop),
       camelize ? t.identifier(camel(prop)) : t.identifier(prop),
@@ -462,17 +377,9 @@ export const createTypedObjectParams = (
     );
   });
 
-  const obj = t.objectPattern(
-    [
-      ...params
-    ]
-  );
+  const obj = t.objectPattern([...params]);
 
-  obj.typeAnnotation = getParamsTypeAnnotation(
-    context,
-    jsonschema,
-    camelize
-  );
+  obj.typeAnnotation = getParamsTypeAnnotation(context, jsonschema, camelize);
 
   return obj;
 };

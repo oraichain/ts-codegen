@@ -19,4 +19,4 @@ export declare const getPropertyType: (context: RenderContext, schema: JSONSchem
 };
 export declare function getPropertySignatureFromProp(context: RenderContext, jsonschema: JSONSchema, prop: string, camelize: boolean): t.TSPropertySignature;
 export declare const getParamsTypeAnnotation: (context: RenderContext, jsonschema: any, camelize?: boolean) => t.TSTypeAnnotation;
-export declare const createTypedObjectParams: (context: RenderContext, jsonschema: JSONSchema, camelize?: boolean) => (t.Identifier | t.Pattern | t.RestElement);
+export declare const createTypedObjectParams: (context: RenderContext, jsonschema: JSONSchema, camelize?: boolean) => t.Identifier | t.Pattern | t.RestElement;
