@@ -1,6 +1,6 @@
 {
   "name": "@oraichain/ts-codegen",
-  "version": "0.35.8",
+  "version": "0.35.9",
   "description": "@cosmwasm/ts-codegen converts your CosmWasm smart contracts into dev-friendly TypeScript classes so you can focus on shipping code.",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "homepage": "https://github.com/cosmwasm/ts-codegen",
@@ -82,7 +82,7 @@
     "@babel/runtime": "^7.18.9",
     "@babel/traverse": "7.18.11",
     "@babel/types": "7.18.10",
-    "@oraichain/wasm-ast-types": "^0.26.4",
+    "@oraichain/wasm-ast-types": "^0.26.5",
     "@pyramation/json-schema-to-typescript": " 11.0.4",
     "case": "1.6.3",
     "dargs": "7.0.0",
